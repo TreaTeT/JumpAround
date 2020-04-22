@@ -25,6 +25,11 @@ export default function App() {
   const [TOP10_MODAL_SHOWING, setTOP10_MODAL_SHOWING] = useState(false);
   const [SETTINGS_MODAL_SHOWING, setSETTINGS_MODAL_SHOWING] = useState(false);
 
+  const Ninja = require("./assets/Images/Player/Ninja.png");
+  const Knight = require("./assets/Images/Player/Knight.png");
+
+  const [charSkin, setCharSkin] = useState(Knight);
+
 
 
 
@@ -57,15 +62,33 @@ export default function App() {
 
 
 
-            <View style={styles.container}>
-              <Image source={require("./assets/Images/Player/Character2_x128.png")} style={styles.charIcon}></Image>
-            </View>
-            <View style={styles.container}>
-              <Image source={require("./assets/Images/Player/MainChar_x256.png")} style={styles.charIcon}></Image>
-            </View>
-          </View>
+            <View style={styles.iconsMenu}>
 
-          <Button title="CLOSE" onPress={() => { setSETTINGS_MODAL_SHOWING(!SETTINGS_MODAL_SHOWING) }} />
+
+              <TouchableOpacity onPress={() => { setCharSkin(Ninja) }}>
+                <View style={styles.iconContainer}>
+                  <Image source={require("./assets/Images/Player/Ninja.png")} style={styles.charIcon}></Image>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => { setCharSkin(Knight) }}>
+                <View style={styles.iconContainer}>
+                  <Image source={require("./assets/Images/Player/Knight.png")} style={styles.charIcon}></Image>
+
+                </View>
+              </TouchableOpacity>
+
+
+            </View>
+
+            <TouchableOpacity onPress={() => {
+              setSETTINGS_MODAL_SHOWING(!SETTINGS_MODAL_SHOWING)
+            }}>
+              <View style={{ paddingTop: 10, paddingRight: 12 }}>
+                <Image source={require('./assets/Images/Menu/X_128.png')} style={{ width: 30, height: 30, }}></Image>
+              </View>
+            </TouchableOpacity>
+          </View>
 
         </Modal>
 
@@ -96,7 +119,7 @@ export default function App() {
         {/* PLAYER */}
 
         <View style={styles.container}>
-          <Image source={require("./assets/Images/Player/MainChar_x256.png")} style={styles.character}></Image>
+          <Image source={charSkin} style={styles.character}></Image>
         </View>
         {/* COIN */}
 
@@ -205,10 +228,12 @@ const styles = StyleSheet.create({
   },
   settingsModal: {
     width: 500,
-    height: 250,
+    height: 273,
     backgroundColor: "white",
+    borderWidth: 1,
     borderRadius: 10,
     flexDirection: "row"
+
   },
   charIcon: {
     width: 70,
@@ -218,5 +243,20 @@ const styles = StyleSheet.create({
     borderRadius: 10,
 
 
+
+  },
+  iconsMenu: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    flexWrap: "wrap"
+
+
+  },
+  iconContainer: {
+    padding: 10
   }
+
+
+
 });
