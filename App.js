@@ -7,9 +7,11 @@ import {
   TouchableOpacity,
   Button,
   Text,
+  StatusBar,
 } from "react-native";
 
 import * as ScreenOrientation from "expo-screen-orientation";
+import Game from "./Game";
 
 import Modal from "react-native-modal";
 
@@ -30,6 +32,8 @@ export default function App() {
   const [OBSTACLE_MODAL_SHOWING, setOBSTACLE_MODAL_SHOWING] = useState(false);
   const [BG_MODAL_SHOWING, setBG_MODAL_SHOWING] = useState(false);
 
+  const [gameRunning, setGameRunning] = useState(false);
+
   //temporary
   const Ninja = require("./assets/Images/Player/Ninja.png");
   const Knight = require("./assets/Images/Player/Knight.png");
@@ -40,24 +44,28 @@ export default function App() {
   const [obstacleSkin, setObstacleSkin] = useState(Obstacle);
   const [backgroundSkin, setBackgroundSkin] = useState(Background);
 
-  return (
-    <View style={styles.container}>
-      <ImageBackground
-        source={require("./assets/Images/Background/Bricks-BG.png")}
-        style={styles.background}
-      >
-        {/* HEADER */}
+  if (gameRunning) {
+    return <Game />;
+  } else {
+    return (
+      <View style={styles.container}>
+        <StatusBar hidden />
+        <ImageBackground
+          source={require("./assets/Images/Background/Bricks-BG.png")}
+          style={styles.background}
+        >
+          {/* HEADER */}
 
-        <View style={styles.container}>
-          <Image
-            source={require("./assets/Images/Menu/JumpAround-Header.png")}
-            style={styles.header}
-          ></Image>
-        </View>
+          <View style={styles.container}>
+            <Image
+              source={require("./assets/Images/Menu/JumpAround-Header.png")}
+              style={styles.header}
+            ></Image>
+          </View>
 
-        {/* TOP10 MODAL */}
+          {/* TOP10 MODAL */}
 
-        {/* 
+          {/* 
         <Modal
           isVisible={TOP10_MODAL_SHOWING}
           onBackdropPress={() => {
@@ -76,215 +84,224 @@ export default function App() {
         </Modal> 
         */}
 
-        {/* CHARCTER SKIN MODAL */}
+          {/* CHARCTER SKIN MODAL */}
 
-        {/* SETTINGS MODAL */}
+          {/* SETTINGS MODAL */}
 
-        <Modal
-          isVisible={SETTINGS_MODAL_SHOWING}
-          onBackdropPress={() => {
-            setSETTINGS_MODAL_SHOWING(!SETTINGS_MODAL_SHOWING);
-          }}
-        >
-          {/*  CHARACTER SKIN PICK MODAL AND ICON */}
-          <View style={styles.modalContainer}>
-            <View style={styles.settingsMenu}>
-              <TouchableOpacity
-                onPress={() => {
-                  setCHARACTER_MODAL_SHOWING(!CHARACTER_MODAL_SHOWING);
-                }}
-              >
-                <View style={styles.iconContainer}>
-                  <Image
-                    source={charSkin}
-                    style={styles.settingsCharIcon}
-                  ></Image>
-                  <Text
-                    style={{
-                      textAlign: "center",
-                      textTransform: "uppercase",
-                      fontWeight: "bold",
-                    }}
-                  >{`Character`}</Text>
-                </View>
-              </TouchableOpacity>
+          <Modal
+            isVisible={SETTINGS_MODAL_SHOWING}
+            onBackdropPress={() => {
+              setSETTINGS_MODAL_SHOWING(!SETTINGS_MODAL_SHOWING);
+            }}
+          >
+            {/*  CHARACTER SKIN PICK MODAL AND ICON */}
+            <View style={styles.modalContainer}>
+              <View style={styles.settingsMenu}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setCHARACTER_MODAL_SHOWING(!CHARACTER_MODAL_SHOWING);
+                  }}
+                >
+                  <View style={styles.iconContainer}>
+                    <Image
+                      source={charSkin}
+                      style={styles.settingsCharIcon}
+                    ></Image>
+                    <Text
+                      style={{
+                        textAlign: "center",
+                        textTransform: "uppercase",
+                        fontWeight: "bold",
+                      }}
+                    >{`Character`}</Text>
+                  </View>
+                </TouchableOpacity>
 
-              <Modal
-                isVisible={CHARACTER_MODAL_SHOWING}
-                onBackdropPress={() => {
-                  setCHARACTER_MODAL_SHOWING(!CHARACTER_MODAL_SHOWING);
-                }}
-              >
-                <View style={styles.modalContainer}>
-                  <View style={styles.iconsMenu}>
+                <Modal
+                  isVisible={CHARACTER_MODAL_SHOWING}
+                  onBackdropPress={() => {
+                    setCHARACTER_MODAL_SHOWING(!CHARACTER_MODAL_SHOWING);
+                  }}
+                >
+                  <View style={styles.modalContainer}>
+                    <View style={styles.iconsMenu}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setCharSkin(Ninja);
+                        }}
+                      >
+                        <View style={styles.iconContainer}>
+                          <Image
+                            source={require("./assets/Images/Player/Ninja.png")}
+                            style={styles.charIcon}
+                          ></Image>
+                        </View>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        onPress={() => {
+                          setCharSkin(Knight);
+                        }}
+                      >
+                        <View style={styles.iconContainer}>
+                          <Image
+                            source={require("./assets/Images/Player/Knight.png")}
+                            style={styles.charIcon}
+                          ></Image>
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+
                     <TouchableOpacity
                       onPress={() => {
-                        setCharSkin(Ninja);
+                        setCHARACTER_MODAL_SHOWING(!CHARACTER_MODAL_SHOWING);
                       }}
                     >
-                      <View style={styles.iconContainer}>
+                      <View style={{ paddingTop: 10, paddingRight: 12 }}>
                         <Image
-                          source={require("./assets/Images/Player/Ninja.png")}
-                          style={styles.charIcon}
-                        ></Image>
-                      </View>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      onPress={() => {
-                        setCharSkin(Knight);
-                      }}
-                    >
-                      <View style={styles.iconContainer}>
-                        <Image
-                          source={require("./assets/Images/Player/Knight.png")}
-                          style={styles.charIcon}
+                          source={require("./assets/Images/Menu/X_128.png")}
+                          style={{ width: 30, height: 30 }}
                         ></Image>
                       </View>
                     </TouchableOpacity>
                   </View>
+                </Modal>
 
-                  <TouchableOpacity
-                    onPress={() => {
-                      setCHARACTER_MODAL_SHOWING(!CHARACTER_MODAL_SHOWING);
-                    }}
-                  >
-                    <View style={{ paddingTop: 10, paddingRight: 12 }}>
-                      <Image
-                        source={require("./assets/Images/Menu/X_128.png")}
-                        style={{ width: 30, height: 30 }}
-                      ></Image>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              </Modal>
+                {/*  OBSTACLE SKIN PICK MODAL AND ICON */}
 
-              {/*  OBSTACLE SKIN PICK MODAL AND ICON */}
+                <TouchableOpacity
+                  onPress={() =>
+                    setOBSTACLE_MODAL_SHOWING(!OBSTACLE_MODAL_SHOWING)
+                  }
+                >
+                  <View style={styles.iconContainer}>
+                    <Image
+                      source={obstacleSkin}
+                      style={styles.settingsCharIcon}
+                    ></Image>
+                    <Text
+                      style={{
+                        textAlign: "center",
+                        textTransform: "uppercase",
+                        fontWeight: "bold",
+                      }}
+                    >{`Obstacle`}</Text>
+                  </View>
+                </TouchableOpacity>
 
-              <TouchableOpacity>
-                <View style={styles.iconContainer}>
+                {/* BACKGROUND SKIN PICK MODAL AND ICON */}
+
+                <TouchableOpacity>
+                  <View style={styles.iconContainer}>
+                    <Image
+                      source={backgroundSkin}
+                      style={styles.settingsCharIcon}
+                    ></Image>
+                    <Text
+                      style={{
+                        textAlign: "center",
+                        textTransform: "uppercase",
+                        fontWeight: "bold",
+                      }}
+                    >{`Backdrop`}</Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity
+                onPress={() => {
+                  setSETTINGS_MODAL_SHOWING(!SETTINGS_MODAL_SHOWING);
+                }}
+              >
+                <View style={{ paddingTop: 10, paddingRight: 12 }}>
                   <Image
-                    source={obstacleSkin}
-                    style={styles.settingsCharIcon}
+                    source={require("./assets/Images/Menu/X_128.png")}
+                    style={{ width: 30, height: 30 }}
                   ></Image>
-                  <Text
-                    style={{
-                      textAlign: "center",
-                      textTransform: "uppercase",
-                      fontWeight: "bold",
-                    }}
-                  >{`Obstacle`}</Text>
-                </View>
-              </TouchableOpacity>
-
-              {/* BACKGROUND SKIN PICK MODAL AND ICON */}
-
-              <TouchableOpacity>
-                <View style={styles.iconContainer}>
-                  <Image
-                    source={backgroundSkin}
-                    style={styles.settingsCharIcon}
-                  ></Image>
-                  <Text
-                    style={{
-                      textAlign: "center",
-                      textTransform: "uppercase",
-                      fontWeight: "bold",
-                    }}
-                  >{`Backdrop`}</Text>
                 </View>
               </TouchableOpacity>
             </View>
+          </Modal>
+
+          {/* MENU */}
+
+          <View style={styles.menu}>
+            {/* SETTINGS  ICON*/}
 
             <TouchableOpacity
               onPress={() => {
                 setSETTINGS_MODAL_SHOWING(!SETTINGS_MODAL_SHOWING);
               }}
             >
-              <View style={{ paddingTop: 10, paddingRight: 12 }}>
-                <Image
-                  source={require("./assets/Images/Menu/X_128.png")}
-                  style={{ width: 30, height: 30 }}
-                ></Image>
-              </View>
+              <Image
+                source={require("./assets/Images/Menu/Settings_x128.png")}
+                style={styles.icon}
+              ></Image>
+            </TouchableOpacity>
+
+            {/* PLAY ICON */}
+
+            <TouchableOpacity
+              onPress={() => {
+                setGameRunning(!gameRunning);
+              }}
+            >
+              <Image
+                source={require("./assets/Images/Menu/Play_x128.png")}
+                style={styles.playIcon}
+              ></Image>
+            </TouchableOpacity>
+
+            {/* TOP 10 ICON*/}
+
+            <TouchableOpacity
+              onPress={() => {
+                setTOP10_MODAL_SHOWING(!TOP10_MODAL_SHOWING);
+              }}
+            >
+              <Image
+                source={require("./assets/Images/Menu/Top10_x128.png")}
+                style={styles.icon}
+              ></Image>
             </TouchableOpacity>
           </View>
-        </Modal>
 
-        {/* MENU */}
+          {/* PLAYER */}
 
-        <View style={styles.menu}>
-          {/* SETTINGS  ICON*/}
+          <View style={styles.container}>
+            <Image source={charSkin} style={styles.character}></Image>
+          </View>
 
-          <TouchableOpacity
-            onPress={() => {
-              setSETTINGS_MODAL_SHOWING(!SETTINGS_MODAL_SHOWING);
-            }}
-          >
+          {/* COIN */}
+
+          <View style={styles.container}>
             <Image
-              source={require("./assets/Images/Menu/Settings_x128.png")}
-              style={styles.icon}
+              source={require("./assets/Images/Coins/Coin_x128.png")}
+              style={styles.coin}
             ></Image>
-          </TouchableOpacity>
+          </View>
 
-          {/* PLAY ICON */}
+          {/* OBSTACLE */}
 
-          <TouchableOpacity>
+          <View style={styles.container}>
             <Image
-              source={require("./assets/Images/Menu/Play_x128.png")}
-              style={styles.playIcon}
+              source={require("./assets/Images/Obstacles/Obstacle_x128.png")}
+              style={styles.obstacle}
             ></Image>
-          </TouchableOpacity>
+          </View>
 
-          {/* TOP 10 ICON*/}
+          {/* FLOOR */}
 
-          <TouchableOpacity
-            onPress={() => {
-              setTOP10_MODAL_SHOWING(!TOP10_MODAL_SHOWING);
-            }}
-          >
+          <View style={styles.container}>
             <Image
-              source={require("./assets/Images/Menu/Top10_x128.png")}
-              style={styles.icon}
+              source={require("./assets/Images/Background/Floor-BG.png")}
+              style={styles.floor}
             ></Image>
-          </TouchableOpacity>
-        </View>
-
-        {/* PLAYER */}
-
-        <View style={styles.container}>
-          <Image source={charSkin} style={styles.character}></Image>
-        </View>
-
-        {/* COIN */}
-
-        <View style={styles.container}>
-          <Image
-            source={require("./assets/Images/Coins/Coin_x128.png")}
-            style={styles.coin}
-          ></Image>
-        </View>
-
-        {/* OBSTACLE */}
-
-        <View style={styles.container}>
-          <Image
-            source={require("./assets/Images/Obstacles/Obstacle_x128.png")}
-            style={styles.obstacle}
-          ></Image>
-        </View>
-
-        {/* FLOOR */}
-
-        <View style={styles.container}>
-          <Image
-            source={require("./assets/Images/Background/Floor-BG.png")}
-            style={styles.floor}
-          ></Image>
-        </View>
-      </ImageBackground>
-    </View>
-  );
+          </View>
+        </ImageBackground>
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
