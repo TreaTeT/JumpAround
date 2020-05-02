@@ -7,7 +7,7 @@ export default class Player extends Component {
     let height = this.props.size[1];
 
     let x = this.props.body.position.x - width / 2;
-    let y = this.props.body.position.y - height * 2;
+    let y = this.props.body.position.y - height / 2;
 
     return (
       <View

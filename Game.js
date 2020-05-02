@@ -26,7 +26,7 @@ export default class Game extends Component {
 
     let player = Matter.Bodies.rectangle(
       CONSTANTS.MAX_WIDTH / 4,
-      CONSTANTS.MAX_HEIGHT / 2,
+      CONSTANTS.MAX_HEIGHT / 3,
       50,
       50
     );
@@ -35,11 +35,19 @@ export default class Game extends Component {
       CONSTANTS.MAX_HEIGHT / 2,
       CONSTANTS.MAX_WIDTH - 25,
       CONSTANTS.MAX_HEIGHT,
+      50,
+      { isStatic: true }
+    );
+
+    let ceiling = Matter.Bodies.rectangle(
+      CONSTANTS.MAX_HEIGHT / 2,
+      25,
+      CONSTANTS.MAX_HEIGHT,
       25,
       { isStatic: true }
     );
 
-    Matter.World.add(world, [player, floor]);
+    Matter.World.add(world, [player, floor, ceiling]);
 
     console.log(`player x is ${player.position.x}`);
     console.log(`player y is ${player.position.y}`);
@@ -52,7 +60,13 @@ export default class Game extends Component {
       player: { body: player, size: [50, 50], color: "red", renderer: Player },
       floor: {
         body: floor,
-        size: [CONSTANTS.MAX_HEIGHT, 100],
+        size: [CONSTANTS.MAX_HEIGHT, 50],
+        color: "green",
+        renderer: Wall,
+      },
+      ceiling: {
+        body: ceiling,
+        size: [CONSTANTS.MAX_HEIGHT, 50],
         color: "green",
         renderer: Wall,
       },
