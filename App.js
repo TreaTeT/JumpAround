@@ -16,16 +16,6 @@ import Game from "./Game";
 import Modal from "react-native-modal";
 
 export default function App() {
-  useEffect(() => {
-    async function changeScreenOrientation() {
-      await ScreenOrientation.lockAsync(
-        ScreenOrientation.OrientationLock.LANDSCAPE_LEFT
-      );
-    }
-
-    changeScreenOrientation();
-  }, []);
-
   const [TOP10_MODAL_SHOWING, setTOP10_MODAL_SHOWING] = useState(false);
   const [SETTINGS_MODAL_SHOWING, setSETTINGS_MODAL_SHOWING] = useState(false);
   const [CHARACTER_MODAL_SHOWING, setCHARACTER_MODAL_SHOWING] = useState(false);
@@ -38,11 +28,22 @@ export default function App() {
   const Ninja = require("./assets/Images/Player/Ninja.png");
   const Knight = require("./assets/Images/Player/Knight.png");
   const Obstacle = require("./assets/Images/Obstacles/Obstacle_x128.png");
+  const TreeTrunk = require("./assets/Images/Obstacles/Obstacle2_x256.png");
   const Background = require("./assets/Images/Background/Bricks-BG.png");
 
   const [charSkin, setCharSkin] = useState(Knight);
   const [obstacleSkin, setObstacleSkin] = useState(Obstacle);
   const [backgroundSkin, setBackgroundSkin] = useState(Background);
+
+  useEffect(() => {
+    // LOCK SCREEN ORIENTATION
+    async function changeScreenOrientation() {
+      await ScreenOrientation.lockAsync(
+        ScreenOrientation.OrientationLock.LANDSCAPE_LEFT
+      );
+    }
+    changeScreenOrientation();
+  }, []);
 
   if (gameRunning) {
     return <Game />;
@@ -189,6 +190,56 @@ export default function App() {
                   </View>
                 </TouchableOpacity>
 
+                <Modal
+                  isVisible={OBSTACLE_MODAL_SHOWING}
+                  onBackdropPress={() => {
+                    setOBSTACLE_MODAL_SHOWING(!OBSTACLE_MODAL_SHOWING);
+                  }}
+                >
+                  <View style={styles.modalContainer}>
+                    <View style={styles.iconsMenu}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setObstacleSkin(TreeTrunk);
+                        }}
+                      >
+                        <View style={styles.iconContainer}>
+                          <Image
+                            source={require("./assets/Images/Obstacles/Obstacle2_x256.png")}
+                            style={styles.charIcon}
+                          ></Image>
+                        </View>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        onPress={() => {
+                          setObstacleSkin(Obstacle);
+                        }}
+                      >
+                        <View style={styles.iconContainer}>
+                          <Image
+                            source={require("./assets/Images/Obstacles/Obstacle_x128.png")}
+                            style={styles.charIcon}
+                          ></Image>
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+
+                    <TouchableOpacity
+                      onPress={() => {
+                        setOBSTACLE_MODAL_SHOWING(!OBSTACLE_MODAL_SHOWING);
+                      }}
+                    >
+                      <View style={{ paddingTop: 10, paddingRight: 12 }}>
+                        <Image
+                          source={require("./assets/Images/Menu/X_128.png")}
+                          style={{ width: 30, height: 30 }}
+                        ></Image>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                </Modal>
+
                 {/* BACKGROUND SKIN PICK MODAL AND ICON */}
 
                 <TouchableOpacity>
@@ -284,10 +335,7 @@ export default function App() {
           {/* OBSTACLE */}
 
           <View style={styles.container}>
-            <Image
-              source={require("./assets/Images/Obstacles/Obstacle_x128.png")}
-              style={styles.obstacle}
-            ></Image>
+            <Image source={obstacleSkin} style={styles.obstacle}></Image>
           </View>
 
           {/* FLOOR */}
