@@ -114,7 +114,9 @@ export default function App() {
                         textTransform: "uppercase",
                         fontWeight: "bold",
                       }}
-                    >{`Character`}</Text>
+                    >
+                      {"Character"}
+                    </Text>
                   </View>
                 </TouchableOpacity>
 
