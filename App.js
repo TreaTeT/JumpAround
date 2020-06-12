@@ -8,12 +8,14 @@ import {
   Button,
   Text,
   StatusBar,
+  FlatList,
 } from "react-native";
 
 import * as ScreenOrientation from "expo-screen-orientation";
 import Game from "./Game";
 
 import Modal from "react-native-modal";
+import Physics from "./Physics";
 
 export default function App() {
   const [TOP10_MODAL_SHOWING, setTOP10_MODAL_SHOWING] = useState(false);
@@ -25,15 +27,132 @@ export default function App() {
   const [gameRunning, setGameRunning] = useState(false);
 
   //temporary
+
+  //TODO: optimize importing skins
+  // characters
   const Ninja = require("./assets/Images/Player/Ninja.png");
   const Knight = require("./assets/Images/Player/Knight.png");
+  const Cloudy = require("./assets/Images/Player/Cloudy.png");
+  const MaskedDude = require("./assets/Images/Player/MaskedDude.png");
+  const Ninja2 = require("./assets/Images/Player/Ninja2.png");
+  const Robot = require("./assets/Images/Player/Robot.png");
+
+  // obstacles
   const Obstacle = require("./assets/Images/Obstacles/Obstacle_x128.png");
   const TreeTrunk = require("./assets/Images/Obstacles/Obstacle2_x256.png");
+  const Crate = require("./assets/Images/Obstacles/Crate.png");
+  const TrafficCone = require("./assets/Images/Obstacles/TrafficCone.png");
+  const TrashCan = require("./assets/Images/Obstacles/TrashCan.png");
+
+  // background
   const Background = require("./assets/Images/Background/Bricks-BG.png");
 
   const [charSkin, setCharSkin] = useState(Knight);
   const [obstacleSkin, setObstacleSkin] = useState(Obstacle);
   const [backgroundSkin, setBackgroundSkin] = useState(Background);
+
+  const [charSkins, setCharSkins] = useState({});
+  const [obstacleSkins, setObstacleSkins] = useState({});
+
+  const [money, setMoney] = useState(0);
+  // skin prices
+
+  const blueSkinCost = 50;
+  const pinkSkinCost = 100;
+  const redSkinCost = 150;
+
+  const [top10, setTop10] = new useState([]);
+
+  const axios = require("axios").default;
+
+  const getTop10Scoreboard = () => {
+    axios
+      .get("http://192.168.1.14:3001/top10")
+      .then(function (response) {
+        // handle success
+        setTop10(response.data);
+        const top10Arr = Object.keys(response.data).map(
+          (i) => response.data[i]
+        );
+
+        top10Arr.sort(function (a, b) {
+          return b.score - a.score;
+        });
+
+        setTop10(top10Arr.slice(0, 10));
+      })
+      .catch(function (error) {
+        // handle error
+
+        console.log(error);
+      })
+      .then(function () {
+        // always executed
+      });
+  };
+
+  const getMoney = () => {
+    axios
+      .get("http://192.168.1.14:3001/money")
+      .then(function (response) {
+        // handle success
+        setMoney(response.data[1].money);
+      })
+      .catch(function (error) {
+        // handle error
+
+        console.log(error);
+      })
+      .then(function () {
+        // always executed
+      });
+  };
+
+  const saveMoney = (money) => {
+    axios
+      .post("http://192.168.1.14:3001/money", {
+        money: money,
+      })
+      .then(function (response) {
+        // console.log(response);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
+
+  const getSkins = () => {
+    axios
+      .get("http://192.168.1.14:3001/skins")
+      .then(function (response) {
+        // handle success
+
+        setCharSkins(response.data[1].charSkins);
+        setObstacleSkins(response.data[1].obstacleSkins);
+      })
+      .catch(function (error) {
+        // handle error
+
+        console.log(error);
+      })
+      .then(function () {
+        // always executed
+      });
+  };
+
+  const saveSkins = () => {
+    axios
+      .post("http://192.168.1.14:3001/skins", {
+        charSkins: charSkins,
+        obstacleSkins: obstacleSkins,
+      })
+      .then(function (response) {
+        // console.log(response);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
 
   useEffect(() => {
     // LOCK SCREEN ORIENTATION
@@ -42,11 +161,91 @@ export default function App() {
         ScreenOrientation.OrientationLock.LANDSCAPE_LEFT
       );
     }
+
+    getTop10Scoreboard();
+    getMoney();
+    setCharSkin(Knight);
+    setObstacleSkin(Obstacle);
+    getSkins();
+
     changeScreenOrientation();
   }, []);
 
+  const toggleGame = () => {
+    setGameRunning(!gameRunning);
+  };
+
+  const Item = ({ name, score }) => {
+    return (
+      <View style={styles.item}>
+        <Text
+          style={{
+            fontSize: 20,
+            fontWeight: "bold",
+            textTransform: "uppercase",
+            textAlign: "left",
+          }}
+        >
+          {`${name} :`}
+        </Text>
+        <Text
+          style={{
+            fontSize: 20,
+            fontWeight: "100",
+            textTransform: "uppercase",
+            textAlign: "left",
+            paddingLeft: 25,
+          }}
+        >
+          {score}
+        </Text>
+      </View>
+    );
+  };
+
+  const payForCharSkin = (skinprice, money, skin, skinName) => {
+    if (money >= skinprice) {
+      setCharSkin(skin);
+      setMoney(money - skinprice);
+      setCharSkins({ ...charSkins, [skinName]: true });
+      //here i need to call the update method to /skin to set values fot the damn skin true
+    } else {
+      console.log("mmoney you have " + money);
+      console.log("skinprice is " + skinprice);
+      console.log("cannot afford this skin");
+    }
+  };
+
+  const payForObsSkin = (skinprice, money, skin, skinName) => {
+    if (money >= skinprice) {
+      setObstacleSkin(skin);
+      setMoney(money - skinprice);
+      setObstacleSkins({ ...obstacleSkins, [skinName]: true });
+    } else {
+      console.log("mmoney you have " + money);
+      console.log("skinprice is " + skinprice);
+      console.log("cannot afford this skin");
+    }
+  };
+
+  // const ownCharSkin = (skinName) => {
+  //   if (charSkins[skinName] === true) {
+  //     return true;
+  //   } else {
+  //     return false;
+  //   }
+  // };
+
   if (gameRunning) {
-    return <Game />;
+    return (
+      <Game
+        toggleGame={toggleGame}
+        characterSkin={charSkin}
+        obstacleSkin={obstacleSkin}
+        minScore={top10[9]}
+        money={money}
+      />
+    );
   } else {
     return (
       <View style={styles.container}>
@@ -64,26 +263,40 @@ export default function App() {
             ></Image>
           </View>
 
-          {/* TOP10 MODAL */}
+          {/*  TOP10 MODAL */}
 
-          {/* 
-        <Modal
-          isVisible={TOP10_MODAL_SHOWING}
-          onBackdropPress={() => {
-            setTOP10_MODAL_SHOWING(!TOP10_MODAL_SHOWING);
-          }}
-        >
-          <View style={{ flex: 1 }}>
-            <Text>Hello!</Text>
-            <Button
-              title="CLOSE"
-              onPress={() => {
-                setTOP10_MODAL_SHOWING(!TOP10_MODAL_SHOWING);
-              }}
-            />
-          </View>
-        </Modal> 
-        */}
+          <Modal
+            isVisible={TOP10_MODAL_SHOWING}
+            onBackdropPress={() => {
+              setTOP10_MODAL_SHOWING(!TOP10_MODAL_SHOWING);
+            }}
+          >
+            <View style={styles.modalContainer}>
+              <View style={styles.settingsMenu}>
+                <Text style={styles.scoreboard}>{`TOP 10 SCOREBOARD`}</Text>
+                {/* Here handle rendering fo the flatlist*/}
+                <FlatList
+                  style={styles.flatlist}
+                  data={top10}
+                  renderItem={({ item }) => (
+                    <Item name={item.name} score={item.score} />
+                  )}
+                />
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  setTOP10_MODAL_SHOWING(!TOP10_MODAL_SHOWING);
+                }}
+              >
+                <View style={{ paddingTop: 10, paddingRight: 12 }}>
+                  <Image
+                    source={require("./assets/Images/Menu/X_128.png")}
+                    style={{ width: 30, height: 30 }}
+                  ></Image>
+                </View>
+              </TouchableOpacity>
+            </View>
+          </Modal>
 
           {/* CHARCTER SKIN MODAL */}
 
@@ -128,19 +341,7 @@ export default function App() {
                 >
                   <View style={styles.modalContainer}>
                     <View style={styles.iconsMenu}>
-                      <TouchableOpacity
-                        onPress={() => {
-                          setCharSkin(Ninja);
-                        }}
-                      >
-                        <View style={styles.iconContainer}>
-                          <Image
-                            source={require("./assets/Images/Player/Ninja.png")}
-                            style={styles.charIcon}
-                          ></Image>
-                        </View>
-                      </TouchableOpacity>
-
+                      {/* KNIGHT */}
                       <TouchableOpacity
                         onPress={() => {
                           setCharSkin(Knight);
@@ -151,6 +352,126 @@ export default function App() {
                             source={require("./assets/Images/Player/Knight.png")}
                             style={styles.charIcon}
                           ></Image>
+                        </View>
+                      </TouchableOpacity>
+
+                      {/* NINJA */}
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (charSkins.Ninja) {
+                            console.log("u already own the skin");
+                            setCharSkin(Ninja);
+                          } else {
+                            payForCharSkin(blueSkinCost, money, Ninja, "Ninja");
+                          }
+                        }}
+                      >
+                        <View style={styles.iconContainer}>
+                          <Image source={Ninja} style={styles.charIcon}></Image>
+                          <Text style={{ textAlign: "center" }}>
+                            {charSkins.Ninja ? "bought" : blueSkinCost}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+
+                      {/* CLOUDY */}
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (charSkins.Cloudy) {
+                            console.log("u already own the skin");
+                            setCharSkin(Cloudy);
+                          } else {
+                            payForCharSkin(
+                              blueSkinCost,
+                              money,
+                              Cloudy,
+                              "Cloudy"
+                            );
+                          }
+                        }}
+                      >
+                        <View style={styles.iconContainer}>
+                          <Image
+                            source={Cloudy}
+                            style={styles.charIcon}
+                          ></Image>
+                          <Text style={{ textAlign: "center" }}>
+                            {charSkins.Cloudy ? "bought" : blueSkinCost}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+
+                      {/*  MASKED DUDE */}
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (charSkins.MaskedDude) {
+                            console.log("u already own the skin");
+                            setCharSkin(MaskedDude);
+                          } else {
+                            payForCharSkin(
+                              pinkSkinCost,
+                              money,
+                              MaskedDude,
+                              "MaskedDude"
+                            );
+                          }
+                        }}
+                      >
+                        <View style={styles.iconContainer}>
+                          <Image
+                            source={MaskedDude}
+                            style={styles.charIcon}
+                          ></Image>
+                          <Text style={{ textAlign: "center" }}>
+                            {charSkins.MaskedDude ? "bought" : pinkSkinCost}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+
+                      {/* NINJA 2 */}
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (charSkins.Ninja2) {
+                            console.log("u already own the skin");
+                            setCharSkin(Ninja2);
+                          } else {
+                            payForCharSkin(
+                              pinkSkinCost,
+                              money,
+                              Ninja2,
+                              "Ninja2"
+                            );
+                          }
+                        }}
+                      >
+                        <View style={styles.iconContainer}>
+                          <Image
+                            source={Ninja2}
+                            style={styles.charIcon}
+                          ></Image>
+                          <Text style={{ textAlign: "center" }}>
+                            {charSkins.Ninja2 ? "bought" : pinkSkinCost}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+
+                      {/* ROBOT */}
+
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (charSkins.Robot) {
+                            console.log("u already own the skin");
+                            setCharSkin(Robot);
+                          } else {
+                            payForCharSkin(redSkinCost, money, Robot, "Robot");
+                          }
+                        }}
+                      >
+                        <View style={styles.iconContainer}>
+                          <Image source={Robot} style={styles.charIcon}></Image>
+                          <Text style={{ textAlign: "center" }}>
+                            {charSkins.Robot ? "bought" : redSkinCost}
+                          </Text>
                         </View>
                       </TouchableOpacity>
                     </View>
@@ -202,19 +523,6 @@ export default function App() {
                     <View style={styles.iconsMenu}>
                       <TouchableOpacity
                         onPress={() => {
-                          setObstacleSkin(TreeTrunk);
-                        }}
-                      >
-                        <View style={styles.iconContainer}>
-                          <Image
-                            source={require("./assets/Images/Obstacles/Obstacle2_x256.png")}
-                            style={styles.charIcon}
-                          ></Image>
-                        </View>
-                      </TouchableOpacity>
-
-                      <TouchableOpacity
-                        onPress={() => {
                           setObstacleSkin(Obstacle);
                         }}
                       >
@@ -223,6 +531,33 @@ export default function App() {
                             source={require("./assets/Images/Obstacles/Obstacle_x128.png")}
                             style={styles.charIcon}
                           ></Image>
+                        </View>
+                      </TouchableOpacity>
+
+                      {/* Tree Trunk*/}
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (obstacleSkins.TreeTrunk) {
+                            console.log("already own the skin");
+                            setObstacleSkin(TreeTrunk);
+                          } else {
+                            payForObsSkin(
+                              blueSkinCost,
+                              money,
+                              TreeTrunk,
+                              "TreeTrunk"
+                            );
+                          }
+                        }}
+                      >
+                        <View style={styles.iconContainer}>
+                          <Image
+                            source={TreeTrunk}
+                            style={styles.charIcon}
+                          ></Image>
+                          <Text style={{ textAlign: "center" }}>
+                            {obstacleSkins.TreeTrunk ? "bought" : blueSkinCost}
+                          </Text>
                         </View>
                       </TouchableOpacity>
                     </View>
@@ -260,10 +595,12 @@ export default function App() {
                   </View>
                 </TouchableOpacity>
               </View>
-
+              <Text>{`${money}`}</Text>
               <TouchableOpacity
                 onPress={() => {
                   setSETTINGS_MODAL_SHOWING(!SETTINGS_MODAL_SHOWING);
+                  saveSkins();
+                  saveMoney(money);
                 }}
               >
                 <View style={{ paddingTop: 10, paddingRight: 12 }}>
@@ -284,6 +621,7 @@ export default function App() {
             <TouchableOpacity
               onPress={() => {
                 setSETTINGS_MODAL_SHOWING(!SETTINGS_MODAL_SHOWING);
+                getMoney();
               }}
             >
               <Image
@@ -310,6 +648,7 @@ export default function App() {
             <TouchableOpacity
               onPress={() => {
                 setTOP10_MODAL_SHOWING(!TOP10_MODAL_SHOWING);
+                getTop10Scoreboard();
               }}
             >
               <Image
@@ -344,7 +683,7 @@ export default function App() {
 
           <View style={styles.container}>
             <Image
-              source={require("./assets/Images/Background/Floor-BG.png")}
+              source={require("./assets/Images/Background/Floor-BG-BIG.png")}
               style={styles.floor}
             ></Image>
           </View>
@@ -451,5 +790,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     left: 80,
     flexDirection: "row",
+  },
+  item: {
+    padding: 10,
+    alignSelf: "flex-start",
+
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "flex-end",
+  },
+  flatlist: {
+    alignSelf: "center",
+  },
+  scoreboard: {
+    position: "absolute",
+    top: 97,
+    left: -150,
+    color: "red",
+    fontSize: 20,
+    transform: [{ rotate: "-90deg" }],
+    width: 250,
   },
 });

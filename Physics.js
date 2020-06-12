@@ -34,7 +34,7 @@ const Physics = (entities, { touches, time, dispatch }) => {
       entities["obs" + i].scored = false;
     } else {
       Matter.Body.translate(entities["obs" + i].body, { x: -4, y: 0 });
-      // Matter.Body.translate(entities["coin"].body, { x: -3, y: 0 });
+      Matter.Body.translate(entities["coin"].body, { x: -1.5, y: 0 });
     }
   }
 

@@ -8,7 +8,8 @@ export default class Player extends Component {
 
     let x = this.props.body.position.x - width / 2;
     let y = this.props.body.position.y - height / 2;
-    let image = require("./assets/Images/Player/Knight.png");
+
+    let skin = this.props.skin;
     return (
       <Image
         style={{
@@ -19,7 +20,7 @@ export default class Player extends Component {
           height: height + 20,
           //backgroundColor: this.props.color,
         }}
-        source={image}
+        source={skin}
         resizeMode={"stretch"}
       />
       // <View

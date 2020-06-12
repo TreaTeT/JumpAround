@@ -10,15 +10,28 @@ export default class Floor extends Component {
 
     let floor = require("./assets/Images/Background/Floor-BG.png");
     return (
-      <View
+      // <View
+      //   style={{
+      //     position: "absolute",
+      //     left: x,
+      //     top: y,
+      //     width: width,
+      //     height: height,
+      //     backgroundColor: this.props.color,
+      //   }}
+      // />
+
+      <Image
         style={{
           position: "absolute",
           left: x,
           top: y,
           width: width,
           height: height,
-          backgroundColor: this.props.color,
+          //backgroundColor: this.props.color,
         }}
+        source={floor}
+        resizeMode={"repeat"}
       />
     );
   }

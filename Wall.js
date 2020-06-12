@@ -8,7 +8,7 @@ export default class Wall extends Component {
     const x = this.props.body.position.x - width / 2;
     const y = this.props.body.position.y - height / 2;
 
-    let image = require("./assets/Images/Obstacles/Obstacle_x128.png");
+    let skin = this.props.skin;
 
     return (
       <Image
@@ -20,7 +20,7 @@ export default class Wall extends Component {
           height: height + 10,
         }}
         resizeMode={"stretch"}
-        source={image}
+        source={skin}
       />
 
       // <View

@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Text,
   ImageBackground,
+  Image,
+  TextInput,
 } from "react-native";
 import Matter, { Constraint } from "matter-js";
 import { GameEngine } from "react-native-game-engine";
@@ -16,6 +18,8 @@ import Physics from "./Physics";
 import Wall from "./Wall";
 import Coin from "./Coin";
 import Floor from "./Floor";
+import Modal from "react-native-modal";
+const axios = require("axios").default;
 
 export default class Game extends Component {
   constructor(props) {
@@ -25,13 +29,59 @@ export default class Game extends Component {
       running: true,
       ready: true,
       score: 0,
+      charSkin: this.props.characterSkin,
+      obsSkin: this.props.obstacleSkin,
+      coins: 0,
+      minScore: this.props.minScore.score,
+      saveScore: false,
+      saveScoreModal: false,
+      saveScoreUsername: "",
+      money: this.props.money,
     };
 
     this.gameEngine = null;
 
     this.entities = this.setupWorld();
+    this.saveUser = this.saveUser.bind(this);
+    this.saveMoney = this.saveMoney.bind(this);
   }
+
   //const BG = require("./assets/Images/Background/Bricks-BG.png");
+  saveUser = (name, score) => {
+    axios
+      .post("http://192.168.1.14:3001/top10", {
+        name: name,
+        score: score,
+      })
+      .then(function (response) {
+        console.log(response);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+
+    this.setState({
+      saveScoreModal: !this.state.saveScoreModal,
+    });
+
+    this.props.toggleGame();
+  };
+
+  saveMoney = (coins) => {
+    axios
+      .post("http://192.168.1.14:3001/money", {
+        money: this.props.money + coins,
+      })
+      .then(function (response) {
+        console.log(response);
+        this.setState({
+          money: this.state.money + coins,
+        });
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
 
   setupWorld = () => {
     let engine = Matter.Engine.create({ enableSleeping: false });
@@ -66,22 +116,22 @@ export default class Game extends Component {
     let obs1 = Matter.Bodies.rectangle(
       CONSTANTS.MAX_HEIGHT - 50 / 2,
       CONSTANTS.MAX_WIDTH - 75,
-      50,
-      50,
+      40,
+      40,
       { isStatic: true }
     );
     let obs2 = Matter.Bodies.rectangle(
       CONSTANTS.MAX_HEIGHT + 500 / 2,
       CONSTANTS.MAX_WIDTH - 75,
-      50,
-      50,
+      40,
+      40,
       { isStatic: true }
     );
     let obs3 = Matter.Bodies.rectangle(
       CONSTANTS.MAX_HEIGHT + 1000 / 2,
       CONSTANTS.MAX_WIDTH - 75,
-      50,
-      50,
+      40,
+      40,
       { isStatic: true }
     );
 
@@ -91,10 +141,10 @@ export default class Game extends Component {
       CONSTANTS.MAX_HEIGHT - 80,
       CONSTANTS.MAX_WIDTH - 100,
       25,
-      { isStatic: true }
+      { isSensor: true, isStatic: true }
     );
 
-    Matter.World.add(world, [player, floor, obs1, obs2, obs3]);
+    Matter.World.add(world, [player, floor, obs1, obs2, obs3, coin]);
 
     Matter.Events.on(engine, "collisionStart", (event) => {
       // for (let i = 0; i < pairs.length; i++) {
@@ -111,6 +161,14 @@ export default class Game extends Component {
           if (pair.bodyA === player && pair.bodyB === level[i]) {
             this.gameEngine.dispatch({ type: "game-over" });
           }
+        }
+
+        if (pair.bodyB.isSensor) {
+          Matter.World.remove(world, coin);
+          this.setState({
+            coins: this.state.coins + 1,
+          });
+          console.log("coin was deleted");
         }
 
         // TODO: sem hocikedy sa dotkne mince tak ju collectne
@@ -130,15 +188,15 @@ export default class Game extends Component {
       }
     });
 
-    console.log(`player x is ${player.position.x}`);
-    console.log(`player y is ${player.position.y}`);
-
-    console.log(`floor x is ${floor.position.x}`);
-    console.log(`floor y is ${floor.position.y}`);
-
     return {
       physics: { engine: engine, world: world },
-      player: { body: player, size: [50, 50], color: "red", renderer: Player },
+      player: {
+        body: player,
+        size: [50, 50],
+        color: "red",
+        renderer: Player,
+        skin: this.state.charSkin,
+      },
       floor: {
         body: floor,
         size: [CONSTANTS.MAX_HEIGHT, 50],
@@ -152,6 +210,7 @@ export default class Game extends Component {
         color: "orange",
         scored: false,
         renderer: Wall,
+        skin: this.state.obsSkin,
       },
       obs2: {
         body: obs2,
@@ -159,6 +218,7 @@ export default class Game extends Component {
         color: "orange",
         scored: false,
         renderer: Wall,
+        skin: this.state.obsSkin,
       },
       obs3: {
         body: obs3,
@@ -166,18 +226,25 @@ export default class Game extends Component {
         color: "orange",
         scored: false,
         renderer: Wall,
+        skin: this.state.obsSkin,
       },
 
-      // coin: {
-      //   body: coin,
-      //   size: [50, 50],
-      //   renderer: Coin,
-      // },
+      coin: {
+        body: coin,
+        size: [35, 35],
+
+        renderer: Coin,
+      },
     };
   };
 
   onEvent = (e) => {
     if (e.type === "game-over") {
+      if (this.state.score > this.state.minScore) {
+        this.setState({
+          saveScore: true,
+        });
+      }
       this.setState({
         running: false,
       });
@@ -190,9 +257,12 @@ export default class Game extends Component {
 
   reset = () => {
     this.gameEngine.swap(this.setupWorld());
+    this.saveMoney(this.state.coins);
     this.setState({
       running: true,
       score: 0,
+      saveScore: false,
+      coins: 0,
     });
   };
 
@@ -204,6 +274,19 @@ export default class Game extends Component {
           style={styles.background}
         >
           <Text style={styles.score}>{this.state.score}</Text>
+          <View>
+            <Text style={styles.coins}>{this.state.coins}</Text>
+            <Image
+              source={require("./assets/Images/Coins/Coin_x128.png")}
+              style={{
+                height: 25,
+                width: 25,
+                alignSelf: "flex-end",
+                top: 15,
+              }}
+            ></Image>
+          </View>
+
           <GameEngine
             ref={(ref) => {
               this.gameEngine = ref;
@@ -216,16 +299,95 @@ export default class Game extends Component {
           ></GameEngine>
 
           {/* GAME OVER SCREEN */}
+
           {!this.state.running && (
-            <TouchableOpacity
-              style={styles.fullScreenButton}
-              onPress={this.reset}
-            >
-              <View style={styles.fullScreen}>
-                <Text style={styles.gameOverText}>Game Over</Text>
+            <View style={styles.fullScreen}>
+              <Text style={styles.gameOverText}>Game Over</Text>
+
+              <View>
+                <Button
+                  title={`RETRY`}
+                  onPress={this.reset}
+                  color="#ffffff"
+                ></Button>
+                <Button
+                  title={`MENU`}
+                  onPress={() => {
+                    this.props.toggleGame();
+                    this.saveMoney(this.state.coins);
+                  }}
+                  color="#ffffff"
+                ></Button>
+
+                <Button
+                  title={`SAVE SCORE`}
+                  disabled={!this.state.saveScore}
+                  color="#ffffff"
+                  onPress={() => {
+                    this.setState({
+                      saveScoreModal: !this.state.saveScoreModal,
+                    });
+                  }}
+                ></Button>
               </View>
-            </TouchableOpacity>
+
+              <Modal
+                isVisible={this.state.saveScoreModal}
+                onBackdropPress={() => {
+                  this.setState({
+                    saveScoreModal: !this.state.saveScoreModal,
+                  });
+                }}
+              >
+                <View style={styles.modalContainer}>
+                  <View style={styles.settingsMenu}>
+                    <View style={styles.saveScoreView}>
+                      <Text>{`Enter your name: `}</Text>
+                      <TextInput
+                        style={{
+                          height: 40,
+                          width: 150,
+                          borderColor: "gray",
+                          borderWidth: 1,
+                        }}
+                        onChangeText={(text) => {
+                          this.setState({
+                            saveScoreUsername: text,
+                          });
+                        }}
+                        value={this.state.saveScoreUsername}
+                      ></TextInput>
+                      <Button
+                        title={`SAVE`}
+                        onPress={() => {
+                          this.saveUser(
+                            this.state.saveScoreUsername,
+                            this.state.score
+                          );
+                        }}
+                        color="#000000"
+                      ></Button>
+                    </View>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => {
+                      this.setState({
+                        saveScoreModal: !this.state.saveScoreModal,
+                      });
+                    }}
+                  >
+                    <View style={{ paddingTop: 10, paddingRight: 12 }}>
+                      <Image
+                        source={require("./assets/Images/Menu/X_128.png")}
+                        style={{ width: 30, height: 30 }}
+                      ></Image>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              </Modal>
+            </View>
           )}
+
           <StatusBar hidden={true} />
         </ImageBackground>
       </View>
@@ -262,14 +424,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  fullScreenButton: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flex: 1,
-  },
+
   background: {
     flex: 1,
     resizeMode: "cover",
@@ -280,5 +435,34 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     paddingTop: 5,
+    position: "absolute",
+    alignSelf: "center",
+  },
+  coins: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+    position: "absolute",
+    alignSelf: "flex-end",
+    top: 15,
+    right: 45,
+  },
+  modalContainer: {
+    width: 500,
+    height: 273,
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderRadius: 10,
+    flexDirection: "row",
+  },
+  settingsMenu: {
+    flex: 1,
+    alignItems: "center",
+    left: 80,
+    flexDirection: "row",
+  },
+  saveScoreView: {
+    alignItems: "center",
   },
 });
