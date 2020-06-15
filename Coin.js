@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View } from "react-native";
+import { Image } from "react-native";
 
 export default class Coin extends Component {
   render() {
@@ -8,18 +8,33 @@ export default class Coin extends Component {
     const x = this.props.body.position.x - width / 2;
     const y = this.props.body.position.y - height / 2;
 
+    let coin = require("./assets/Images/Coins/Coin_x128.png");
     return (
-      <View
+      // <View
+      //   style={{
+      //     position: "absolute",
+      //     left: x,
+      //     top: y,
+      //     borderRadius: 50,
+      //     width: width,
+      //     height: height,
+      //     backgroundColor: "yellow",
+      //   }}
+      // ></View>
+
+      <Image
         style={{
           position: "absolute",
           left: x,
           top: y,
-          borderRadius: 50,
           width: width,
           height: height,
-          backgroundColor: "yellow",
+          borderRadius: 50,
+          //backgroundColor: this.props.color,
         }}
-      ></View>
+        source={coin}
+        resizeMode={"cover"}
+      />
     );
   }
 }

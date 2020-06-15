@@ -4,7 +4,7 @@ import CONSTANTS from "./CONSTANTS";
 const Physics = (entities, { touches, time, dispatch }) => {
   let engine = entities.physics.engine;
   let player = entities.player.body;
-  engine.world.gravity.y = 1.1;
+  engine.world.gravity.y = 0.9;
 
   touches
     .filter((t) => t.type === "press")
@@ -17,6 +17,13 @@ const Physics = (entities, { touches, time, dispatch }) => {
 
       Matter.Body.setVelocity(player, { x: 0, y: -28 });
     });
+
+  if (entities["coin"].body.position.x <= -1 * (50 / 2)) {
+    Matter.Body.setPosition(entities["coin"].body, {
+      x: CONSTANTS.MAX_HEIGHT * 1.5 - 50 / 2,
+      y: entities["coin"].body.position.y,
+    });
+  }
 
   for (let i = 1; i <= 3; i++) {
     if (
@@ -34,7 +41,7 @@ const Physics = (entities, { touches, time, dispatch }) => {
       entities["obs" + i].scored = false;
     } else {
       Matter.Body.translate(entities["obs" + i].body, { x: -4, y: 0 });
-      Matter.Body.translate(entities["coin"].body, { x: -1.5, y: 0 });
+      Matter.Body.translate(entities["coin"].body, { x: -1.328, y: 0 });
     }
   }
 

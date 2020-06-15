@@ -74,13 +74,14 @@ export default class Game extends Component {
       })
       .then(function (response) {
         console.log(response);
-        this.setState({
-          money: this.state.money + coins,
-        });
       })
       .catch(function (error) {
         console.log(error);
       });
+
+    this.setState({
+      money: this.state.money + coins,
+    });
   };
 
   setupWorld = () => {
@@ -139,7 +140,7 @@ export default class Game extends Component {
 
     let coin = Matter.Bodies.circle(
       CONSTANTS.MAX_HEIGHT - 80,
-      CONSTANTS.MAX_WIDTH - 100,
+      CONSTANTS.MAX_WIDTH - 75,
       25,
       { isSensor: true, isStatic: true }
     );
@@ -164,7 +165,6 @@ export default class Game extends Component {
         }
 
         if (pair.bodyB.isSensor) {
-          Matter.World.remove(world, coin);
           this.setState({
             coins: this.state.coins + 1,
           });
@@ -464,5 +464,8 @@ const styles = StyleSheet.create({
   },
   saveScoreView: {
     alignItems: "center",
+    flex: 1,
+    flexDirection: "row",
+    top: -25,
   },
 });

@@ -560,6 +560,63 @@ export default function App() {
                           </Text>
                         </View>
                       </TouchableOpacity>
+
+                      {/* TRRAFFIC CONE */}
+
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (obstacleSkins.TrafficCone) {
+                            console.log("already own the skin");
+                            setObstacleSkin(TrafficCone);
+                          } else {
+                            payForObsSkin(
+                              pinkSkinCost,
+                              money,
+                              TrafficCone,
+                              "TrafficCone"
+                            );
+                          }
+                        }}
+                      >
+                        <View style={styles.iconContainer}>
+                          <Image
+                            source={TrafficCone}
+                            style={styles.charIcon}
+                          ></Image>
+                          <Text style={{ textAlign: "center" }}>
+                            {obstacleSkins.TrafficCone
+                              ? "bought"
+                              : pinkSkinCost}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+
+                      {/* TRASHCAN */}
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (obstacleSkins.TrashCan) {
+                            console.log("already own the skin");
+                            setObstacleSkin(TrashCan);
+                          } else {
+                            payForObsSkin(
+                              redSkinCost,
+                              money,
+                              TrashCan,
+                              "TrashCan"
+                            );
+                          }
+                        }}
+                      >
+                        <View style={styles.iconContainer}>
+                          <Image
+                            source={TrashCan}
+                            style={styles.charIcon}
+                          ></Image>
+                          <Text style={{ textAlign: "center" }}>
+                            {obstacleSkins.TrashCan ? "bought" : redSkinCost}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
                     </View>
 
                     <TouchableOpacity
@@ -595,7 +652,14 @@ export default function App() {
                   </View>
                 </TouchableOpacity>
               </View>
-              <Text>{`${money}`}</Text>
+              <View style={styles.peniazky}>
+                <Text style={{ fontSize: 20, right: 5 }}>{`${money}`}</Text>
+                <Image
+                  source={require("./assets/Images/Coins/Coin_x128.png")}
+                  style={{ width: 25, height: 25 }}
+                ></Image>
+              </View>
+
               <TouchableOpacity
                 onPress={() => {
                   setSETTINGS_MODAL_SHOWING(!SETTINGS_MODAL_SHOWING);
@@ -810,5 +874,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     transform: [{ rotate: "-90deg" }],
     width: 250,
+  },
+  peniazky: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    top: 230,
+    right: -205,
   },
 });
